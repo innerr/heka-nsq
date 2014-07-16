@@ -12,6 +12,7 @@ import (
 
 type NSQOutputConfig struct {
 	Address string
+	Topic string
 	RoutingKey string
 }
 
@@ -30,6 +31,7 @@ func (ao *NSQOutput) Init(config interface{}) (err error) {
 
 func (ao *NSQOutput) Run(or OutputRunner, h PluginHelper) (err error) {
 	inChan := or.InChan()
+	url := "http://" + ao.config.Address + "/put?topic=" + ao.config.Topic
 
 	var pack *PipelinePack
 	var msg *message.Message
@@ -46,7 +48,7 @@ func (ao *NSQOutput) Run(or OutputRunner, h PluginHelper) (err error) {
 			}
 			msg = pack.Message
 			body = []byte(msg.GetPayload())
-			resp, err = http.Post("http://", "application/octet-stream", bytes.NewReader(body))
+			resp, err = http.Post(url, "application/octet-stream", bytes.NewReader(body))
 			if err != nil {
 				or.LogError(err)
 				break
